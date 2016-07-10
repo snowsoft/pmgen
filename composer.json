@@ -1,6 +1,7 @@
 {
 	"name": "epigra/pmgen",
 	"description": "Package Migration generator for Laravel",
+	"keywords": ["laravel","package","development","migration","generator","template"],
 	"authors": [
 		{
 			"name": "Uğur Aydoğdu",
