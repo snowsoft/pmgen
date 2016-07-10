@@ -1,0 +1,19 @@
+{
+	"name": "epigra/package-migration-generator",
+	"description": "Migration generator for Laravel packages",
+	"authors": [
+		{
+			"name": "Uğur Aydoğdu",
+			"email": "ugur.aydogdu@epigra.com"
+		}
+	],
+	"require": {
+	    "php": ">=5.5.9",
+	    "laravel/framework": "^5.2"
+	},
+	"autoload": {
+		"psr-4": {
+			"Epigra\\PMG\\": "src/"
+		}
+	}	
+}
