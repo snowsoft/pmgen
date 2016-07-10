@@ -1,10 +1,14 @@
 <?php
-namespace Epigra\PMG;
+namespace Epigra\PMGen;
 
 use Illuminate\Console\Command;
 
-class PMGMigration extends Command
+class MigrationGenerator extends Command
 {
+    private $migrationFiles;
+    private $moduleDirectory;
+    private $generatorsDirectory;
+
     /**
      * Create a new command instance.
      *
@@ -13,12 +17,12 @@ class PMGMigration extends Command
     public function __construct()
     {
         parent::__construct();
+        
+        $this->moduleDirectory  = $this->getModuleDirectory();
+        $this->generatorsDirectory = $this->getGeneratorsDirectory();
+        \View::addNamespace('pmgenviews', $this->generatorsDirectory);
 
-        $moduleDirectory  = substr(__DIR__, 0, -8);
-        $generatorsDirectory = $moduleDirectory.'/Resources/generators';
-        \View::addNamespace('generator', $generatorsDirectory);
-
-        $files = glob($generatorsDirectory.'/*.php');
+        $files = glob($this->generatorsDirectory.'/*.php');
         foreach($files as $key => $file) {
 
             $filename = pathinfo($file,PATHINFO_FILENAME);
@@ -27,9 +31,19 @@ class PMGMigration extends Command
             $this->migrationFiles[$key] = [];
             $this->migrationFiles[$key]['generator'] = $filename;
             $this->migrationFiles[$key]['file_name'] = $migrationFileName;
-            $this->migrationFiles[$key]['file_path'] = base_path("/database/migrations")."/".$migrationFileName;
+            $this->migrationFiles[$key]['file_path'] = base_path("database/migrations")."/".$migrationFileName;
 
         }
+    }
+
+    public function getModuleDirectory()
+    {            
+        return dirname((new \ReflectionClass(static::class))->getFileName()).'/../';
+    }
+
+    public function getGeneratorsDirectory()
+    {
+        return $this->moduleDirectory.'/Resources/generators';
     }
 
     /**
@@ -45,12 +59,12 @@ class PMGMigration extends Command
     protected function createMigrations(){
 
         foreach($this->migrationFiles as $key => $mf):
-            $mf['output'] = $this->laravel->view->make('generator::'.$mf['generator'])->render();
+            $mf['output'] = $this->laravel->view->make('pmgenviews::'.$mf['generator'])->render();
 
             if (preg_match('/class[\s\n]+([a-zA-Z0-9_]+)[\s\na-zA-Z0-9_]+\{/', $mf['output'], $matches)) {
                 $mf['class'] = $matches[1];
             } 
-
+          
             if (!class_exists($mf['class']) && $fs = fopen($mf['file_path'], 'x')) {
                 $this->line("Creating migration ". $mf['file_name']);
                 fwrite($fs, $mf['output']);

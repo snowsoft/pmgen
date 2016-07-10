@@ -1,6 +1,6 @@
 {
-	"name": "epigra/package-migration-generator",
-	"description": "Migration generator for Laravel packages",
+	"name": "epigra/pmgen",
+	"description": "Package Migration generator for Laravel",
 	"authors": [
 		{
 			"name": "Uğur Aydoğdu",
@@ -13,7 +13,7 @@
 	},
 	"autoload": {
 		"psr-4": {
-			"Epigra\\PMG\\": "src/"
+			"Epigra\\PMGen\\": "src/"
 		}
 	}	
 }
