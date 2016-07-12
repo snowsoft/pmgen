@@ -57,3 +57,4 @@ public function getGeneratorsDirectory()
 	- Save the files with current timestamps into `database/migrations` directory if they're not already created. (may need composer dump-autoload)
 
 	
+* If you need to order your migrations (for some reason like foreign key references etc) you can add `a number and an underscore` to make them orderable by name in your generators directory (like `0_create_xxx_table.php`, `1_create_yyy_table.php`) So that migrations can also be generated in order.

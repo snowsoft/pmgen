@@ -8,6 +8,7 @@ class MigrationGenerator extends Command
     private $migrationFiles;
     private $moduleDirectory;
     private $generatorsDirectory;
+    private $fileNamesOrdered = false;
 
     /**
      * Create a new command instance.
@@ -21,19 +22,7 @@ class MigrationGenerator extends Command
         $this->moduleDirectory  = $this->getModuleDirectory();
         $this->generatorsDirectory = $this->getGeneratorsDirectory();
         \View::addNamespace('pmgenviews', $this->generatorsDirectory);
-
-        $files = glob($this->generatorsDirectory.'/*.php');
-        foreach($files as $key => $file) {
-
-            $filename = pathinfo($file,PATHINFO_FILENAME);
-            $migrationFileName = date('Y_m_d_His').'_'.$filename.'.php';
-
-            $this->migrationFiles[$key] = [];
-            $this->migrationFiles[$key]['generator'] = $filename;
-            $this->migrationFiles[$key]['file_name'] = $migrationFileName;
-            $this->migrationFiles[$key]['file_path'] = base_path("database/migrations")."/".$migrationFileName;
-
-        }
+        
     }
 
     public function getModuleDirectory()
@@ -46,6 +35,18 @@ class MigrationGenerator extends Command
         return $this->moduleDirectory.'/Resources/generators';
     }
 
+    private function getMigrationFileName($filename){
+        $first_underscore_pos =  strpos($filename, '_');
+        $before_first_underscore = substr($filename, 0, $first_underscore_pos);
+        if(is_numeric($before_first_underscore)){
+            $filename = substr($filename, $first_underscore_pos + 1);
+            $this->fileNamesOrdered = true;
+        }
+
+        return date('Y_m_d_His').'_'.$filename.'.php';
+    }
+
+
     /**
      * Execute the console command.
      *
@@ -53,7 +54,27 @@ class MigrationGenerator extends Command
      */
     public function handle()
     {
+        $this->prepareMigrationFiles();
         $this->createMigrations();
+    }
+
+    protected function prepareMigrationFiles(){
+        $files = glob($this->generatorsDirectory.'/*.php');
+
+        foreach($files as $key => $file) {
+
+            $filename = pathinfo($file,PATHINFO_FILENAME);
+
+            $migrationFileName = $this->getMigrationFileName($filename);
+
+            $this->migrationFiles[$key] = [];
+            $this->migrationFiles[$key]['generator'] = $filename;
+            $this->migrationFiles[$key]['file_name'] = $migrationFileName;
+            $this->migrationFiles[$key]['file_path'] = base_path("database/migrations")."/".$migrationFileName;
+            
+            if($this->fileNamesOrdered) sleep(1);
+
+        }
     }
 
     protected function createMigrations(){
